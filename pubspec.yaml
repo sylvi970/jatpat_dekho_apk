@@ -1,0 +1,43 @@
+name: jatpat_dekho_apk
+description: A new Flutter project.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=2.19.3 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.5
+  shared_preferences: ^2.0.12
+  cloud_firestore: ^4.8.5
+  http:
+  image_picker: ^0.8.4+4
+  get: ^4.6.5
+
+  cupertino_icons: ^1.0.2
+  google_nav_bar: ^5.0.6
+  line_icons: ^2.0.3
+  responsive_grid_list: ^1.3.2
+  camera: ^0.10.5+2
+  flutter_facebook_auth: ^4.0.0
+  google_sign_in: ^5.2.1
+  firebase_auth: ^4.7.3
+  video_player: ^2.7.2
+  video_thumbnail: ^0.5.3
+  http_parser: ^4.0.2
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/1298-2487-animated-icon-set-1-color (1).riv
+    - public/images/B2B.jpeg
+    - public/images/B2C.jpg
+    - public/images/C2C.png

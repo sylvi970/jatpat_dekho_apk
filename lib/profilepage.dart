@@ -12,9 +12,11 @@ class ProfileWidget extends StatelessWidget {
   final LoggedInUser loggedInUser;
   final String jwtToken;
 
-  const ProfileWidget(
-      {Key? key, required this.loggedInUser, required this.jwtToken})
-      : super(key: key);
+  const ProfileWidget({
+    Key? key,
+    required this.loggedInUser,
+    required this.jwtToken,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,18 +24,9 @@ class ProfileWidget extends StatelessWidget {
     return Scaffold(
       appBar: loggedInUser.email != null
           ? AppBar(
-              title: const Center(
-                child: Text(
-                  "PROFILE           ",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
+              centerTitle: true,
+              elevation: 1,
+              title: const Text("PROFILE"),
             )
           : null,
       body: SingleChildScrollView(
@@ -52,7 +45,7 @@ class ProfileWidget extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5))),
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const LoginPage()),
@@ -66,7 +59,7 @@ class ProfileWidget extends StatelessWidget {
                       const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const SignUpPage()),
@@ -112,12 +105,12 @@ class ProfileWidget extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            loggedInUser.name??"",
+                            loggedInUser.name ?? "",
                             style: const TextStyle(
                                 color: Colors.black, fontSize: 21),
                           ),
                           Text(
-                            loggedInUser.email??"",
+                            loggedInUser.email ?? "",
                             style: const TextStyle(
                                 color: Colors.grey, fontSize: 16),
                           ),
@@ -134,7 +127,7 @@ class ProfileWidget extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () => Get.to(() => EditProfilPage(
                               loggedInUser: loggedInUser,
-                              jwtToken: jwtToken==""?"":jwtToken,
+                              jwtToken: jwtToken == "" ? "" : jwtToken,
                             )),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
@@ -151,7 +144,7 @@ class ProfileWidget extends StatelessWidget {
                     const Divider(),
 
                     ProfileMenuWidget(
-                      title: loggedInUser.dob??"",
+                      title: loggedInUser.dob ?? "",
                       icon: Icons.cake,
                       endIcon: false,
                       onPress: () {},
@@ -236,6 +229,7 @@ class ProfileMenuWidget extends StatelessWidget {
     required this.onPress,
     this.endIcon = true,
     this.textColor,
+    this.iconColor,
   }) : super(key: key);
 
   final String title;
@@ -243,12 +237,10 @@ class ProfileMenuWidget extends StatelessWidget {
   final VoidCallback onPress;
   final bool endIcon;
   final Color? textColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
-    var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
-    var iconColor = isDark ? Colors.white : Colors.black;
-
     return ListTile(
       onTap: onPress,
       leading: Container(
@@ -256,9 +248,9 @@ class ProfileMenuWidget extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(100),
-          color: iconColor.withOpacity(0.1),
+          color: Colors.white, // Use iconColor if provided, otherwise default
         ),
-        child: Icon(icon, color: iconColor),
+        child: Icon(icon, color: Colors.black),
       ),
       title: Text(title,
           style:
@@ -593,18 +585,14 @@ class _EditProfilPage extends State<EditProfilPage> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5))),
                       onPressed: () async {
-                        // const profession = "Profession";
-                        // const education = "Education";
-                        // const company = "Company";
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfileWidget(
+                                      loggedInUser: widget.loggedInUser,
+                                      jwtToken: widget.jwtToken,
+                                    )));
 
-                        // await controller.updateProfile(
-                        //   controller.profileImage.value,
-                        //   profession,
-                        //   education,
-                        //   company,
-                        // );
-
-                        // Get.back();
                         await updateprofile();
                       },
                       child: const Text("SUBMIT",

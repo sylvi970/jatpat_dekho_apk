@@ -7,7 +7,11 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class SearchResults extends StatefulWidget {
-  const SearchResults({Key? key}) : super(key: key);
+  final LoggedInUser loggedInUser;
+  final String jwtToken;
+  const SearchResults(
+      {Key? key, required this.loggedInUser, required this.jwtToken})
+      : super(key: key);
 
   @override
   _SearchResultsState createState() => _SearchResultsState();
@@ -106,7 +110,9 @@ class _SearchResultsState extends State<SearchResults> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Center(child: Text("Search Results")),
+        centerTitle: true,
+        elevation: 1,
+        title: const Text("SEARCH"),
       ),
       body: Center(
         child: SizedBox(
@@ -123,7 +129,7 @@ class _SearchResultsState extends State<SearchResults> {
                   final searchTerm = search.text;
                   if (searchTerm.isNotEmpty) {
                     fetchSearchResults(searchTerm);
-                  } 
+                  }
                 },
                 decoration: InputDecoration(
                   hintText: "Search",
@@ -289,6 +295,8 @@ class _SearchResultsState extends State<SearchResults> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ProductDescriptionPage(
+                                loggedInUser: widget.loggedInUser,
+                                jwtToken: widget.jwtToken,
                                 product: product,
                                 onFavoriteChanged: (isFavorite) {},
                               ),

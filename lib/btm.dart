@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jatpat_dekho_apk/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'homepage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -9,8 +10,7 @@ import 'chatpage.dart';
 import 'profilepage.dart';
 import 'postadspage.dart';
 
-
-String baseUrl = "http://192.168.0.108:3000";
+String baseUrl = "http://192.168.0.110:3000";
 
 class Product {
   final String pId;
@@ -40,7 +40,7 @@ class Product {
 
 class Category {
   final String categoryName;
-  List<String> subCategories;
+  List<dynamic> subCategories;
   Category({
     required this.categoryName,
     required this.subCategories,
@@ -48,6 +48,7 @@ class Category {
 }
 
 List<Product> products = [];
+List<Category> productCategory = [];
 
 class MainScreen extends StatefulWidget {
   final String jwtToken;
@@ -61,6 +62,56 @@ class MainScreen extends StatefulWidget {
   MainScreen1 createState() => MainScreen1();
 }
 
+Future<List<Product>> fetchProducts() async {
+  List<String> favoriteProductIds = [];
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var jwtToken = prefs.getString('jwtToken');
+  print(jwtToken);
+
+  if(jwtToken != null && jwtToken != ""){
+    print("still coming");
+  final favoriteResponse = await fetchFavoriteProducts(jwtToken);
+  if (favoriteResponse.isNotEmpty) {
+    for (var favoriteProduct in favoriteResponse) {
+      favoriteProductIds.add(favoriteProduct.pId);
+    }
+  }
+  }
+  final url =
+      Uri.parse('$baseUrl/api/products'); // Replace with your products API URL
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      final List<Product> products = data
+          .map((item) => Product(
+              pId: item["pId"],
+              name: item['name'],
+              description: item['description'],
+              price: item['price'].toDouble(),
+              media:
+                  List<String>.from(item['media']), // Convert to List<String>
+              mediaType:
+                  List<bool>.from(item['mediaType']), // Convert to List<String>
+              category: item['category'],
+              productCategory: item['productCategory'],
+              productSubCategory: '',
+              isFavorite:
+                  favoriteProductIds.contains(item['pId']) ? true : false))
+          .toList();
+      return products; // Return the list of products
+    } else {
+      print('Failed to fetch products: ${response.body}');
+      throw Exception('Failed to fetch products');
+    }
+  } catch (error) {
+    print('Error during product fetch: $error');
+    throw Exception('Error during product fetch');
+  }
+}
+
 class MainScreen1 extends State<MainScreen> {
   var padding = const EdgeInsets.symmetric(horizontal: 18, vertical: 5);
   double gap = 10;
@@ -69,8 +120,10 @@ class MainScreen1 extends State<MainScreen> {
 
   PageController controller = PageController();
 
+  late Future<List<Category>> productCategoryFuture;
   late Future<List<Product>> productsFuture;
   late Future<LoggedInUser> loggedInUserFuture;
+
   int pageIndex = 0;
   late final List<Widget> pages;
 
@@ -78,59 +131,19 @@ class MainScreen1 extends State<MainScreen> {
   void initState() {
     super.initState();
     productsFuture = fetchProducts();
+    productCategoryFuture = fetchCategories();
     pages = [
       Home(
-          loggedInUser: widget.loggedInUser,
-          productsFuture: productsFuture,
-          jwtToken: widget.jwtToken),
-      const ChatPage(),
+        loggedInUser: widget.loggedInUser,
+        productsFuture: productsFuture,
+        jwtToken: widget.jwtToken,
+        productCategoryFuture: productCategoryFuture,
+      ),
+      ChatPageScreen(jwtToken: widget.jwtToken, loggedInUser: widget.loggedInUser),
       PostAds(loggedInUser: widget.loggedInUser, jwtToken: widget.jwtToken),
-      ProfileWidget(loggedInUser: widget.loggedInUser, jwtToken: widget.jwtToken),
+      ProfileWidget(
+          loggedInUser: widget.loggedInUser, jwtToken: widget.jwtToken),
     ];
-  }
-
-  Future<List<Product>> fetchProducts() async {
-    List<String> favoriteProductIds = [];
-
-    final favoriteResponse = await fetchFavoriteProducts(widget.jwtToken);
-    if (favoriteResponse.isNotEmpty) {
-      for (var favoriteProduct in favoriteResponse) {
-        favoriteProductIds.add(favoriteProduct.pId);
-      }
-    }
-
-    final url = Uri.parse(
-        '$baseUrl/api/products'); // Replace with your products API URL
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        final List<Product> products = data
-            .map((item) => Product(
-                pId: item["pId"],
-                name: item['name'],
-                description: item['description'],
-                price: item['price'].toDouble(),
-                media:
-                    List<String>.from(item['media']), // Convert to List<String>
-                mediaType: List<bool>.from(
-                    item['mediaType']), // Convert to List<String>
-                category: item['category'],
-                productCategory: item['productCategory'],
-                productSubCategory: '',
-                isFavorite:
-                    favoriteProductIds.contains(item['pId']) ? true : false))
-            .toList();
-        return products; // Return the list of products
-      } else {
-        print('Failed to fetch products: ${response.body}');
-        throw Exception('Failed to fetch products');
-      }
-    } catch (error) {
-      print('Error during product fetch: $error');
-      throw Exception('Error during product fetch');
-    }
   }
 
   @override
@@ -226,5 +239,30 @@ class MainScreen1 extends State<MainScreen> {
         ),
       ),
     );
+  }
+
+  Future<List<Category>> fetchCategories() async {
+    final url =
+        Uri.parse('$baseUrl/categories'); // Replace with your API endpoint
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = json.decode(response.body);
+        final List<Category> categories = responseData.map((item) {
+          return Category(
+              categoryName: item["category"],
+              subCategories: item['subCategories']);
+        }).toList();
+
+        return categories;
+      } else {
+        print('Failed to fetch categories: ${response.body}');
+        throw Exception('Failed to fetch categories');
+      }
+    } catch (error) {
+      print('Error during categories fetch: $error');
+      throw Exception('Error during categories fetch');
+    }
   }
 }

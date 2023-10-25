@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, duplicate_ignore
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -87,7 +89,7 @@ class MyApp extends StatelessWidget {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> userData = json.decode(response.body);
-      print(userData);
+
       return LoggedInUser(
         id: userData['user']['id'],
         name: userData['user']['name'],
@@ -128,7 +130,7 @@ class MyApp extends StatelessWidget {
             return Text('Error: ${tokenSnapshot.error}');
           } else {
             final jwtToken = tokenSnapshot.data;
-            print(jwtToken);
+
             if (jwtToken != null) {
               // JWT token found in SharedPreferences, fetch user data
               return FutureBuilder<LoggedInUser>(
@@ -165,8 +167,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-//User Login Page
-
+//User Login Pag
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -232,7 +233,7 @@ class _LoginPageState extends State<LoginPage> {
             company: userDetails['company'],
           );
 
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => nav.MainScreen(
@@ -386,7 +387,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (!isLoading) {
                             loginUser(context);
                           }
-                        },
+                        },   
 
                         // Call loginUser function on button press
                         child: Center(

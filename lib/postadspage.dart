@@ -337,17 +337,9 @@ class _PostAdsState extends State<PostAds> {
       resizeToAvoidBottomInset: false,
       appBar: widget.loggedInUser.email != null
           ? AppBar(
-              title: const Text(
-                "POST YOUR ADS",
-                style: TextStyle(color: Colors.white),
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.pop(
-                      context); // This line will navigate back to the previous screen
-                },
-              ),
+              centerTitle: true,
+              elevation: 1,
+              title: const Text("POST ADS"),
             )
           : null,
       body: SingleChildScrollView(
@@ -567,7 +559,6 @@ class _PostAdsState extends State<PostAds> {
                                   ),
                                 );
                               } else if (price.text.isEmpty) {
-                             
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
@@ -599,8 +590,7 @@ class _PostAdsState extends State<PostAds> {
                                         'Please select at least two images or one video.'),
                                   ),
                                 );
-                              }
-                               else {
+                              } else {
                                 addProductToDatabase();
                               }
                             },
